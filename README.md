@@ -4,15 +4,9 @@ A containerized Kafka streaming pipeline for processing worker stress data in re
 
 ## Architecture
 
-```
-CSV Data → Kafka Producer (Docker) 
-    ↓
-Kafka Broker (Docker)
-    ↓
-External Flink Job (Java-based)
-    ↓
-Real-Time ML Inference & Output
-```
+
+![sysarch](assets/architecture_diagram.png "sysarch")
+
 
 ## Prerequisites
 
