@@ -301,7 +301,7 @@ docker compose logs flink-jobmanager -f
 - **Latency:** <1s end-to-end (Kafka → Flink window → prediction)
 - **Scale:** To process more data, increase producer `SEND_DELAY` or add multiple producers
 
-## Next Steps for Your Team
+## Next Steps
 
 1. **Clone this repo** and check out the `flink-kafka-pipeline` branch
 2. **Run `docker compose up -d`** to verify everything works
