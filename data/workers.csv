@@ -1,5 +1,0 @@
-id,name,cpu,memory
-w1,worker-a,4,8192
-w2,worker-b,2,4096
-w3,worker-c,8,16384
-w4,worker-d,1,2048
