@@ -42,6 +42,18 @@ services:
       - kafka-net
     restart: unless-stopped
 
+  create-topic:
+    image: confluentinc/cp-kafka:7.0.1
+    container_name: create-topic
+    depends_on:
+      - kafka
+    volumes:
+      - ./data/create_topic.sh:/create_topic.sh
+    entrypoint: [ "bash", "/create_topic.sh" ]
+    networks:
+      - kafka-net
+    restart: "no"
+
   csv-producer:
     build:
       context: ./data
