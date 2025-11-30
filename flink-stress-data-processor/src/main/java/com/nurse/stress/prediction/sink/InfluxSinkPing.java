@@ -1,6 +1,7 @@
 package com.nurse.stress.prediction.sink;
 
 import com.nurse.stress.prediction.model.IOTPing;
+import com.nurse.stress.prediction.processing.Constants;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
 
@@ -13,21 +14,22 @@ public class InfluxSinkPing extends RichSinkFunction<IOTPing> {
 
     @Override
     public void open(Configuration parameters) {
-        influxUrl = "http://influxdb:8086/write?db=flink_sink";
+        influxUrl = Constants.INFLUX_URL+"/write?db="+Constants.JOB_SINK_INFLUX_DB;
     }
 
     @Override
     public void invoke(IOTPing ping, Context ctx) throws Exception {
+        long tsNano = ping.datetime * 1_000_000L;
+
         String line = String.format(
-                "flink_events,id=%d EDA=%f,HR=%f,TEMP=%f,datetime=%d,stressLevel=%d",
+                "flink_events,id=%d EDA=%f,HR=%f,TEMP=%f,stressLevel=%d %d",
                 ping.id,
                 ping.EDA,
                 ping.HR,
                 ping.TEMP,
-                ping.datetime,
-                ping.stressLevel
+                ping.stressLevel,
+                tsNano
         );
-
         URL url = new URL(influxUrl);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
