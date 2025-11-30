@@ -1,17 +1,78 @@
 version: "3.8"
 
 services:
+  # -----------------------------
+  # FLINK + METRICS STACK
+  # -----------------------------
+  jobmanager:
+    image: flink:1.19
+    hostname: jobmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        metrics.enabled: true
+    ports:
+      - "8081:8081"
+    command: jobmanager
+    networks:
+      - app-net
+
+  taskmanager:
+    image: flink:1.19
+    hostname: taskmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        metrics.enabled: true
+        metrics.reporter.influxdb.factory.class: org.apache.flink.metrics.influxdb.InfluxdbReporterFactory
+        metrics.reporter.influxdb.host: influxdb
+        metrics.reporter.influxdb.protocol: http
+        metrics.reporter.influxdb.port: 8086
+        metrics.reporter.influxdb.db: flink_metrics
+        metrics.reporter.influxdb.interval: 10 SECONDS
+        taskmanager.numberOfTaskSlots: 2
+        jobmanager.rpc.address: jobmanager
+    command: taskmanager
+    depends_on:
+      - jobmanager
+    networks:
+      - app-net
+
+  influxdb:
+    image: influxdb:1.8
+    container_name: influxdb
+    ports:
+      - "8086:8086"
+    environment:
+      - INFLUXDB_DB=flink_metrics
+    networks:
+      - app-net
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - influxdb
+    networks:
+      - app-net
+
+  # -----------------------------
+  # KAFKA STACK (ZooKeeper + Kafka + Tools)
+  # -----------------------------
   zookeeper:
     image: confluentinc/cp-zookeeper:7.0.1
     container_name: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-    networks:
-      - kafka-net
     ports:
       - "2181:2181"
     restart: unless-stopped
+    networks:
+      - app-net
 
   kafka:
     image: confluentinc/cp-kafka:7.0.1
@@ -24,11 +85,11 @@ services:
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    networks:
-      - kafka-net
     ports:
       - "9092:9092"
     restart: unless-stopped
+    networks:
+      - app-net
 
   kafka-ui:
     image: provectuslabs/kafka-ui
@@ -38,9 +99,9 @@ services:
     environment:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
-    networks:
-      - kafka-net
     restart: unless-stopped
+    networks:
+      - app-net
 
   create-topic:
     image: confluentinc/cp-kafka:7.0.1
@@ -50,9 +111,9 @@ services:
     volumes:
       - ./data/create_topic.sh:/create_topic.sh
     entrypoint: [ "bash", "/create_topic.sh" ]
-    networks:
-      - kafka-net
     restart: "no"
+    networks:
+      - app-net
 
   csv-producer:
     build:
@@ -67,10 +128,14 @@ services:
       TOPIC: stress-topic
       KAFKA_BOOTSTRAP: kafka:9092
       PRODUCER_LOOP: "true"
-    networks:
-      - kafka-net
     restart: unless-stopped
+    networks:
+      - app-net
+
+volumes:
+  grafana-storage:
+    driver: local
 
 networks:
-  kafka-net:
+  app-net:
     driver: bridge
