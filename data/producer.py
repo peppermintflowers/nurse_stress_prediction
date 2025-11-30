@@ -10,7 +10,7 @@ from kafka.admin import KafkaAdminClient
 
 BOOTSTRAP = os.getenv("KAFKA_BOOTSTRAP", "kafka:9092")
 TOPIC = os.getenv("TOPIC", "stress-topic")
-DELAY = float(os.getenv("SEND_DELAY", "0.5"))
+DELAY = float(os.getenv("SEND_DELAY", "1"))
 CSV_PATH = os.getenv("CSV_PATH", "/data/workers.csv")
 LOOP = os.getenv("PRODUCER_LOOP", "false").lower() in ("1", "true", "yes")
 SCHEMA_PATH = "/data/nurse_sensor_event.avsc"
@@ -58,9 +58,10 @@ def encode_avro(record, schema):
 
 
 
-def send_once():
+def send_once(batch_size=70):
     print("Starting CSV streaming...")
 
+    batch = []
     with open(CSV_PATH, "r") as f:
         reader = csv.DictReader(f)
 
@@ -78,17 +79,24 @@ def send_once():
 
             payload = encode_avro(avro_record, schema)
 
-            producer.send(
-                TOPIC,
-                key=str(avro_record["id"]).encode("utf-8"),
-                value=payload
-            )
+            batch.append((str(avro_record["id"]).encode("utf-8"), payload))
 
-            print("sent:", avro_record)
+            # Flush when batch is full
+            if len(batch) >= batch_size:
+                for key, val in batch:
+                    producer.send(TOPIC, key=key, value=val)
+                producer.flush()
+                print(f"Batch of {len(batch)} messages sent")
+                time.sleep(DELAY)
+                batch = []
 
-            time.sleep(DELAY)
+    # Flush remaining messages
+    if batch:
+        for key, val in batch:
+            producer.send(TOPIC, key=key, value=val)
+        producer.flush()
+        print(f"Final batch of {len(batch)} messages sent")
 
-    producer.flush()
 
 
 if LOOP:
