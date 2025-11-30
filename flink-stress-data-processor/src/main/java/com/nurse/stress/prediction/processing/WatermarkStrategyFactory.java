@@ -22,7 +22,8 @@ public class WatermarkStrategyFactory {
                     public long extractTimestamp(SensorRecord element, long recordTimestamp) {
                         return parseTimestamp(element.getDatetime());
                     }
-                });
+                })
+                .withIdleness(Duration.ofSeconds(5));
     }
 
     private static long parseTimestamp(String ts) {
