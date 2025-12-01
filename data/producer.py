@@ -87,7 +87,6 @@ def send_once(batch_size=BATCH_SIZE):
                 for key, val in batch:
                     producer.send(TOPIC, key=key, value=val)
                 producer.flush()
-                print(f"Batch of {len(batch)} messages sent")
                 time.sleep(DELAY)
                 batch = []
 
