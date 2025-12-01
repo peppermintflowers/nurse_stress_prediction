@@ -22,7 +22,7 @@ public class InfluxSinkPing extends RichSinkFunction<IOTPing> {
         long tsNano = ping.datetime * 1_000_000L;
 
         String line = String.format(
-                "flink_events,id=%d EDA=%f,HR=%f,TEMP=%f,stressLevel=%d %d",
+                "flink_events,id=%s EDA=%f,HR=%f,TEMP=%f,stressLevel=%d %d",
                 ping.id,
                 ping.EDA,
                 ping.HR,

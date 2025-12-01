@@ -11,7 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 @NoArgsConstructor
 @AllArgsConstructor
 public class IOTPing {
-    public Integer id;
+    public String id;
     public Float EDA;
     public Float HR;
     public Float TEMP;

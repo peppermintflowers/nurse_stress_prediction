@@ -10,7 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NurseMetrics {
-    private Integer id;
+    private String id;
     private Float X;
     private Float Y;
     private Float Z;

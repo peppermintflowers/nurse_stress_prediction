@@ -35,7 +35,7 @@
     },
     {
       "name": "id",
-      "type": ["null", "int"],
+      "type": ["null", "string"],
       "default": null
     },
     {

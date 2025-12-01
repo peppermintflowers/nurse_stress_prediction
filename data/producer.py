@@ -73,7 +73,7 @@ def send_once(batch_size=70):
                 "EDA": float(row["EDA"]) if row["EDA"] else None,
                 "HR": float(row["HR"]) if row["HR"] else None,
                 "TEMP": float(row["TEMP"]) if row["TEMP"] else None,
-                "id": int(row["id"]) if row["id"] else None,
+                "id": row["id"] if row["id"] else None,
                 "datetime": row["datetime"] if row["datetime"] else None
             }
 

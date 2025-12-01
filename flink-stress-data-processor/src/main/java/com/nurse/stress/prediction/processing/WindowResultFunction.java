@@ -8,11 +8,11 @@ import org.apache.flink.util.Collector;
 
 public class WindowResultFunction extends ProcessWindowFunction<Tuple7<Double, Double, Double, Double, Double, Double, Long>,
         NurseMetrics,
-        Integer,
+        String,
         TimeWindow> {
     @Override
-    public void process(Integer nurseId,
-                        ProcessWindowFunction<Tuple7<Double, Double, Double, Double, Double, Double, Long>, NurseMetrics, Integer, TimeWindow>.Context context,
+    public void process(String nurseId,
+                        ProcessWindowFunction<Tuple7<Double, Double, Double, Double, Double, Double, Long>, NurseMetrics, String, TimeWindow>.Context context,
                         Iterable<Tuple7<Double, Double, Double, Double, Double, Double, Long>> input,
                         Collector<NurseMetrics> out) throws Exception {
         Tuple7<Double, Double, Double, Double, Double, Double, Long> acc = input.iterator().next();
