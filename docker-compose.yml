@@ -132,7 +132,7 @@ services:
 
   flink-job:
     build:
-      context: ./flink-job
+      context: ./flink-stress-data-processor
       dockerfile: Dockerfile
     networks:
       - app-net
