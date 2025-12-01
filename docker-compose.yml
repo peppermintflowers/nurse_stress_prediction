@@ -132,6 +132,15 @@ services:
     networks:
       - app-net
 
+  stress-prediction-service:
+    build:
+      context: ./flask-predictor
+    ports:
+      - "8000:5000"
+    restart: always
+    networks:
+      - app-net
+
 volumes:
   grafana-storage:
     driver: local
