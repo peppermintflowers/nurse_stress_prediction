@@ -7,10 +7,6 @@ services:
   jobmanager:
     image: flink:1.19
     hostname: jobmanager
-    environment:
-      - |
-        FLINK_PROPERTIES=
-        metrics.enabled: true
     ports:
       - "8081:8081"
     command: jobmanager
@@ -23,13 +19,6 @@ services:
     environment:
       - |
         FLINK_PROPERTIES=
-        metrics.enabled: true
-        metrics.reporter.influxdb.factory.class: org.apache.flink.metrics.influxdb.InfluxdbReporterFactory
-        metrics.reporter.influxdb.host: influxdb
-        metrics.reporter.influxdb.protocol: http
-        metrics.reporter.influxdb.port: 8086
-        metrics.reporter.influxdb.db: flink_metrics
-        metrics.reporter.influxdb.interval: 10 SECONDS
         taskmanager.numberOfTaskSlots: 2
         jobmanager.rpc.address: jobmanager
     command: taskmanager
@@ -44,7 +33,7 @@ services:
     ports:
       - "8086:8086"
     environment:
-      - INFLUXDB_DB=flink_metrics
+      - INFLUXDB_DB=flink_sink
     networks:
       - app-net
 
