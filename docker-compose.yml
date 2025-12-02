@@ -130,14 +130,14 @@ services:
     networks:
       - app-net
 
-  flink-job:
-    build:
-      context: ./flink-stress-data-processor
-      dockerfile: Dockerfile
-    networks:
-      - app-net
-    restart: "no"
-    command: [ "sleep", "infinity" ]
+#  flink-job:
+#    build:
+#      context: ./flink-stress-data-processor
+#      dockerfile: Dockerfile
+#    networks:
+#      - app-net
+#    restart: "no"
+#    command: [ "sleep", "infinity" ]
 
 
 volumes:
