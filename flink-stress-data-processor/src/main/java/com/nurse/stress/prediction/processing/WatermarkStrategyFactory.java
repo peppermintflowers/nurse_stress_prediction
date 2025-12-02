@@ -8,11 +8,20 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoField;
 
 public class WatermarkStrategyFactory {
 
     private static final DateTimeFormatter FORMATTER =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSSSSS");
+            new DateTimeFormatterBuilder()
+                    .appendPattern("yyyy-MM-dd HH:mm:ss")
+                    .optionalStart()
+                    .appendFraction(ChronoField.NANO_OF_SECOND, 0, 9, true)
+                    .optionalEnd()
+                    .toFormatter();
+
 
     public static WatermarkStrategy<SensorRecord> create() {
         return WatermarkStrategy
@@ -29,8 +38,13 @@ public class WatermarkStrategyFactory {
     private static long parseTimestamp(String ts) {
         if (ts == null) return System.currentTimeMillis();
 
-        LocalDateTime ldt = LocalDateTime.parse(ts, WatermarkStrategyFactory.FORMATTER);
-
-        return ldt.toInstant(ZoneOffset.UTC).toEpochMilli();
+        try {
+            LocalDateTime ldt = LocalDateTime.parse(ts, FORMATTER);
+            return ldt.toInstant(ZoneOffset.UTC).toEpochMilli();
+        } catch (DateTimeParseException e) {
+            // fallback in case of unexpected format
+            return System.currentTimeMillis();
+        }
     }
+
 }
