@@ -3,20 +3,26 @@ import random
 
 app = Flask(__name__)
 
+model = joblib.load("model/stress_prediction_model_lgbm.joblib")
+
 @app.route('/model/api/predict', methods=['GET'])
-def get_random_number():
+def get_stress_level():
     x=request.args.get('x')
     y=request.args.get('y')
     z=request.args.get('z')
     eda=request.args.get('eda')
     hr=request.args.get('hr')
     temp=request.args.get('temp')
-    random_int = random.randint(0, 2)
-    response = {
-            "stress_level_prediction": str(random_int)
-        }
 
-    return jsonify(response), 200
+    try:
+        features = np.array([ x, y, z, eda, hr, temp]).reshape(1, -1)
+
+        predicted_stress = (model.predict(features)[0])
+        return jsonify({"stress_level_prediction": str(predicted_stress)}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
