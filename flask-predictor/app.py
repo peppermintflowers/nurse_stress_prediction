@@ -1,9 +1,13 @@
 from flask import Flask, request, jsonify
 import random
+import joblib
+import numpy as np
+import os
 
 app = Flask(__name__)
 
-model = joblib.load("model/stress_prediction_model_lgbm.joblib")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+model = joblib.load(os.path.join(BASE_DIR, "model", "stress_prediction_model_lgbm.joblib"))
 
 @app.route('/model/api/predict', methods=['GET'])
 def get_stress_level():
