@@ -11,17 +11,18 @@ model = joblib.load(os.path.join(BASE_DIR, "model", "stress_prediction_model_lgb
 
 @app.route('/model/api/predict', methods=['GET'])
 def get_stress_level():
-    x=request.args.get('x')
-    y=request.args.get('y')
-    z=request.args.get('z')
-    eda=request.args.get('eda')
-    hr=request.args.get('hr')
-    temp=request.args.get('temp')
-
     try:
-        features = np.array([ x, y, z, eda, hr, temp]).reshape(1, -1)
+        x = float(request.args.get('x'))
+        y = float(request.args.get('y'))
+        z = float(request.args.get('z'))
+        eda = float(request.args.get('eda'))
+        hr = float(request.args.get('hr'))
+        temp = float(request.args.get('temp'))
 
-        predicted_stress = (model.predict(features)[0])
+        features = np.array([x, y, z, eda, hr, temp]).reshape(1, -1)
+
+        predicted_stress = model.predict(features)[0]
+
         return jsonify({"stress_level_prediction": str(predicted_stress)}), 200
 
     except Exception as e:
