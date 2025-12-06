@@ -7,6 +7,11 @@ A containerized Kafka streaming pipeline for processing worker stress data in re
 
 ![sysarch](assets/architecture_diagram.png "sysarch")
 
+## Flink Workflow
+![sysarch](assets/flink_workflow.png "sysarch")
+
+
+
 
 ## Prerequisites
 
