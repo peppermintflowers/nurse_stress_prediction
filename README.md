@@ -7,6 +7,34 @@ A containerized Kafka streaming pipeline for processing worker stress data in re
 
 ![sysarch](assets/architecture_diagram.png "sysarch")
 
+### Dask Fallback System
+
+This project includes an **automatic fallback system** using Dask ML that activates when the primary Flink/Spark pipeline experiences resource constraints. The fallback ensures continuous stress monitoring without data loss.
+
+**Key Features:**
+- 🔄 Automatic switching based on processing latency
+- 📊 Processes larger batches (1000 messages) at lower frequency
+- ✅ Zero data loss via Kafka checkpoints
+- 🔧 Fully configurable thresholds and batch sizes
+- 📈 Writes to same InfluxDB with `source=dask-fallback` tag
+
+**Quick Start:**
+```bash
+# System monitors automatically - no action needed
+docker compose up -d
+
+# View fallback status
+docker compose logs dask-fallback -f
+
+# Test the fallback
+cd dask-fallback && ./test_fallback.sh
+```
+
+**Documentation:**
+- 📖 [Integration Guide](DASK_FALLBACK_INTEGRATION.md) - How it works with existing system
+- 📚 [Full Documentation](dask-fallback/README.md) - Detailed technical docs
+- 🚀 [Quick Start](dask-fallback/QUICK_START.md) - Commands and tips
+
 
 ## Prerequisites
 

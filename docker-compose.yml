@@ -139,6 +139,27 @@ services:
 #    restart: "no"
 #    command: [ "sleep", "infinity" ]
 
+  # -----------------------------
+  # DASK FALLBACK PROCESSOR
+  # -----------------------------
+  dask-fallback:
+    build:
+      context: ./dask-fallback
+      dockerfile: Dockerfile
+    container_name: dask-fallback
+    depends_on:
+      - kafka
+      - influxdb
+      - stress-prediction-service
+    volumes:
+      - ./data/nurse_sensor_event.avsc:/data/nurse_sensor_event.avsc:ro
+      - ./dask-fallback/config.yaml:/app/config.yaml:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    networks:
+      - app-net
+
 
 volumes:
   grafana-storage:
