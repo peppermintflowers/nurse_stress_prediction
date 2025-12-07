@@ -10,11 +10,11 @@ from kafka.admin import KafkaAdminClient
 
 BOOTSTRAP = os.getenv("KAFKA_BOOTSTRAP", "kafka:9092")
 TOPIC = os.getenv("TOPIC", "stress-topic")
-DELAY = float(os.getenv("SEND_DELAY", "0.1"))
+DELAY = float(os.getenv("SEND_DELAY", "1"))
 CSV_PATH = os.getenv("CSV_PATH", "/data/workers.csv")
 LOOP = os.getenv("PRODUCER_LOOP", "false").lower() in ("1", "true", "yes")
 SCHEMA_PATH = "/data/nurse_sensor_event.avsc"
-BATCH_SIZE = 60
+BATCH_SIZE = 666
 
 def wait_for_bootstrap(bootstrap, timeout=3, retries=60):
     import socket
