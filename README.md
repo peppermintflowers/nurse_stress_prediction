@@ -11,7 +11,7 @@ A containerized Kafka streaming pipeline for processing worker stress data in re
 
 ### Dask Fallback System
 
-This project includes an **automatic fallback system** using Dask ML that activates when the primary Flink/Spark pipeline experiences resource constraints. The fallback ensures continuous stress monitoring without data loss.
+This project includes an **automatic fallback system** using Dask ML that activates when the primary Flink pipeline experiences resource constraints. The fallback ensures continuous stress monitoring without data loss.
 
 **Key Features:**
 - 🔄 Automatic switching based on processing latency
@@ -109,12 +109,16 @@ stress-pipeline/
 │   ├── producer.py                  # Kafka producer script
 │   ├── requirements.txt             # Python dependencies
 │   └── Dockerfile.producer          # Producer container image
+│── flask_predictor/
+│   ├── model                       # Update model file to this directory
+│   ├── app.py                      # Script to host prediction model
+│   ├── requirements.txt            # Python dependencies
+│   └── Dockerfile                  # Flask API container image
 │
-├── flink-job/
-│   ├── (Handled by external Java Flink job)
-│
-└── dataset/
-    └── (merged_data.csv excluded from git due to 821 MB size)
+├── flink-stress-data-processor/
+│   ├── src                         # Directory contains code for flink job
+│   ├── .gitignore                  # Git ignore
+
 ```
 
 ## Customization & Integration
