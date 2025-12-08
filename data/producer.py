@@ -15,7 +15,7 @@ BOOTSTRAP = os.getenv("KAFKA_BOOTSTRAP", "kafka:9092")
 TOPIC = os.getenv("TOPIC", "stress-topic")
 
 ZIP_PATH = "/data/workers.csv.zip"
-
+# Sensor data generated every 3 ms
 EVENT_INTERVAL_MS = 3
 BATCH_INTERVAL_MS = 990
 EVENTS_PER_BATCH_PER_ID = BATCH_INTERVAL_MS // EVENT_INTERVAL_MS   # = 330
@@ -25,7 +25,7 @@ SCHEMA_PATH = "/data/nurse_sensor_event.avsc"
 START_TIME = datetime.now()
 
 
-# -------------------------------------------------
+# Connect to kafka
 def wait_for_bootstrap(bootstrap, timeout=3, retries=60):
     import socket
     host, port = bootstrap.split(",")[0].split(":")
@@ -42,7 +42,7 @@ def wait_for_bootstrap(bootstrap, timeout=3, retries=60):
 
     raise RuntimeError(f"Could not connect to Kafka at {host}:{port}")
 
-
+# Check topic exists
 def ensure_topic_exists(topic_name):
     admin_client = KafkaAdminClient(bootstrap_servers=BOOTSTRAP)
     if topic_name not in admin_client.list_topics():
@@ -70,10 +70,7 @@ def encode_avro(record, schema):
 
 
 
-# -------------------------------------------------
-#       READ CSVs FROM ZIP INSTEAD OF FILESYSTEM
-# -------------------------------------------------
-
+# Read data from zip
 def open_csv_reader_from_zip(zip_path, filename):
     """
     Opens a CSV inside a ZIP file and returns a streaming DictReader.
@@ -97,7 +94,7 @@ time_BG = START_TIME
 
 TIME_STEP = timedelta(milliseconds=EVENT_INTERVAL_MS)
 
-
+# Get record in avro format
 def get_next_records(reader, curr_time, events_needed, device_id):
     batch = []
     for _ in range(events_needed):
@@ -124,7 +121,7 @@ def get_next_records(reader, curr_time, events_needed, device_id):
 
     return batch, curr_time, False
 
-
+# Send records for each id
 def send_batches_forever():
     global time_6D, time_BG, reader_6D, reader_BG
 
