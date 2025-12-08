@@ -202,7 +202,8 @@ class DaskStressProcessor:
                 
                 if response.status_code == 200:
                     result = response.json()
-                    return int(result['stress_level_prediction'])
+                    # Convert to float first, then to int (handles "2.0" string)
+                    return int(float(result['stress_level_prediction']))
                 else:
                     logger.warning(f"ML service returned {response.status_code}")
                     
@@ -221,13 +222,24 @@ class DaskStressProcessor:
         
         points = []
         for _, row in results.iterrows():
+            # Convert datetime string to timestamp in milliseconds
+            try:
+                dt_str = str(row['datetime'])
+                # Parse datetime and convert to milliseconds timestamp
+                from datetime import datetime
+                dt = datetime.strptime(dt_str.split('.')[0], '%Y-%m-%d %H:%M:%S')
+                timestamp_ms = int(dt.timestamp() * 1000)
+            except Exception as e:
+                logger.warning(f"Error parsing datetime '{row['datetime']}': {e}, using current time")
+                timestamp_ms = int(time.time() * 1000)
+            
             point = {
                 "measurement": self.config['influxdb']['measurement'],
                 "tags": {
-                    "id": row['id'],
+                    "id": str(row['id']),
                     "source": "dask-fallback"
                 },
-                "time": int(row['datetime']),
+                "time": timestamp_ms,
                 "fields": {
                     "X": float(row['X']),
                     "Y": float(row['Y']),
@@ -235,8 +247,7 @@ class DaskStressProcessor:
                     "EDA": float(row['EDA']),
                     "HR": float(row['HR']),
                     "TEMP": float(row['TEMP']),
-                    "stress_level": int(row['stress_level']),
-                    "datetime": int(row['datetime'])
+                    "stress_level": int(row['stress_level'])
                 }
             }
             points.append(point)
