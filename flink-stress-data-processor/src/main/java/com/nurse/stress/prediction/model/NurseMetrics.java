@@ -9,6 +9,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * pojo that holds aggregate feature values over window
+ */
 public class NurseMetrics {
     private String id;
     private Float X;

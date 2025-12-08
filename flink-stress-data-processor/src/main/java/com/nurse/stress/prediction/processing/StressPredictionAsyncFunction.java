@@ -15,7 +15,9 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
-
+/*
+* Flow to get predicted value for aggregated data from nurse stress prediction service
+* */
 public class StressPredictionAsyncFunction implements AsyncFunction<NurseMetrics, IOTPing> {
 
     private transient HttpClient client;
@@ -30,7 +32,7 @@ public class StressPredictionAsyncFunction implements AsyncFunction<NurseMetrics
         if (objectMapper == null) {
             objectMapper = new ObjectMapper();
         }
-
+        // passing feature values as query params
         String uri = String.format(
                 Constants.STRESS_PREDICTION_ML_ENDPOINT,
                 metrics.getX(), metrics.getY(), metrics.getZ(),
@@ -50,7 +52,7 @@ public class StressPredictionAsyncFunction implements AsyncFunction<NurseMetrics
                 // extract stress_level_prediction from JSON response
                 JsonNode node = objectMapper.readTree(body);
                 int predictedStress = node.get(Constants.STRESS_LEVEL_RESPONSE_FIELD).asInt();
-
+                // pojo with data to persist in influx db
                 IOTPing ping = new IOTPing(
                         metrics.getId(),
                         metrics.getEDA(),

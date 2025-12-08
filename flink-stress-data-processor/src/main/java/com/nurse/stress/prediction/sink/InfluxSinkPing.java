@@ -9,6 +9,9 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+/**
+ * enables sinking IOTPing objects containing processed data to influx db
+ */
 public class InfluxSinkPing extends RichSinkFunction<IOTPing> {
     private String influxUrl;
 
@@ -20,7 +23,7 @@ public class InfluxSinkPing extends RichSinkFunction<IOTPing> {
     @Override
     public void invoke(IOTPing ping, Context ctx) throws Exception {
         long tsNano = ping.datetime * 1_000_000L;
-
+        // formatting measurement to be persisted
         String line = String.format(
                 "flink_events,id=%s EDA=%f,HR=%f,TEMP=%f,stressLevel=%d %d",
                 ping.id,

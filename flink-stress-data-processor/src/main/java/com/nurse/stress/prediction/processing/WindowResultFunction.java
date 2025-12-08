@@ -6,6 +6,9 @@ import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 
+/**
+ * computes average over window data based on aggregate values and count of records over window
+ */
 public class WindowResultFunction extends ProcessWindowFunction<Tuple7<Double, Double, Double, Double, Double, Double, Long>,
         NurseMetrics,
         String,
@@ -19,7 +22,7 @@ public class WindowResultFunction extends ProcessWindowFunction<Tuple7<Double, D
 
         long count = acc.f6;
         long lastEventTimeStamp = context.window().maxTimestamp();
-
+        // divide by count to get average
         NurseMetrics nurseMetrics = new NurseMetrics(
                 nurseId,
                 (float)(acc.f0/count),

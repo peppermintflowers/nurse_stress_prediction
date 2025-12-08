@@ -4,6 +4,9 @@ import com.nurse.stress.prediction.SensorRecord;
 import org.apache.flink.api.common.functions.AggregateFunction;
 import org.apache.flink.api.java.tuple.Tuple7;
 
+/**
+ * Computes aggregate(sum) for sensor data and count of records over window
+ */
 public class AverageAggregator implements AggregateFunction<SensorRecord, Tuple7<Double, Double, Double, Double, Double, Double, Long>,
         Tuple7<Double, Double, Double, Double, Double, Double, Long>> {
 
@@ -12,6 +15,8 @@ public class AverageAggregator implements AggregateFunction<SensorRecord, Tuple7
         return Tuple7.of(0.0,0.0,0.0,0.0,0.0,0.0,0L);
     }
 
+    /* add sensor data over window as we receive new records
+    * f6 maintains count of records processed in the window*/
     @Override
     public Tuple7<Double, Double, Double, Double, Double, Double, Long> add(SensorRecord record, Tuple7<Double, Double, Double, Double, Double, Double, Long> acc) {
         double x = record.getX() == null ? 0f : record.getX();
@@ -32,6 +37,7 @@ public class AverageAggregator implements AggregateFunction<SensorRecord, Tuple7
         );
     }
 
+    /* merging data by summing in case handled by different tasks */
     @Override
     public Tuple7<Double, Double, Double, Double, Double, Double, Long> merge(Tuple7<Double, Double, Double, Double, Double, Double, Long> a, Tuple7<Double, Double, Double, Double, Double, Double, Long> b) {
         return Tuple7.of(

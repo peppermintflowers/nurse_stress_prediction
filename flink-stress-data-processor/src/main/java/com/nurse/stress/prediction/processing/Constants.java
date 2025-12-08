@@ -1,5 +1,7 @@
 package com.nurse.stress.prediction.processing;
-
+/*
+* maintains constant values referenced in code
+* */
 public interface Constants {
     String BROKER_URL="kafka:9092";
     String TOPIC_NAME="stress-topic";

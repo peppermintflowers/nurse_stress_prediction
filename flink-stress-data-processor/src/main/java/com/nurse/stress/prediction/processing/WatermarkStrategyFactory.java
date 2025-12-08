@@ -12,8 +12,10 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 
+/**
+ * the watermark strategy to filter data to be processed
+ */
 public class WatermarkStrategyFactory {
-
     private static final DateTimeFormatter FORMATTER =
             new DateTimeFormatterBuilder()
                     .appendPattern("yyyy-MM-dd HH:mm:ss")
@@ -22,7 +24,7 @@ public class WatermarkStrategyFactory {
                     .optionalEnd()
                     .toFormatter();
 
-
+    // all events within 5s of watermark will still be considered if they arrive out of order
     public static WatermarkStrategy<SensorRecord> create() {
         return WatermarkStrategy
                 .<SensorRecord>forBoundedOutOfOrderness(Duration.ofSeconds(5))

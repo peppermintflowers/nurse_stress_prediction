@@ -6,6 +6,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * pojo used to hold data to sink to influx db
+ */
 @Getter
 @Setter
 @NoArgsConstructor
