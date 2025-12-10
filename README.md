@@ -9,6 +9,117 @@ A containerized Kafka streaming pipeline for processing worker stress data in re
 ## Flink Workflow
 ![sysarch](assets/flink_workflow.png "sysarch")
 
+## Prerequisites
+
+- **Docker Desktop** (with Docker Compose v2)
+- **Git**
+- **Java 17**
+- **Python 3.8+** (for local development, optional)
+- **2 GB+ available disk space**
+
+
+## Quick Start For Primary Flink Workflow (5 minutes)
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/peppermintflowers/nurse_stress_prediction.git
+cd nurse_stress_prediction
+```
+
+### 2. Verify Docker is Running
+
+```bash
+docker --version
+docker compose version
+```
+
+Both should output version info. If not, install Docker Desktop.
+
+### 3. Start All Services
+
+From the project root (`nurse_stress_prediction`), run:
+
+```bash
+docker compose up --build -d
+```
+
+This will:
+- Pull/build all images 
+- Start containers in detached mode
+- CSV producer will immediately begin streaming data from csv files in `data/workers.csv.zip` to Kafka
+
+### 4. Verify Services are Running
+
+```bash
+docker compose ps
+```
+
+### 5. Monitor the Pipeline
+
+**Kafka UI Dashboard** (view topics & messages):
+- Open http://localhost:8080 in your browser
+- Navigate to **Topics** → **stress-topic** to see messages flowing
+  ![sysarch](assets/kafka-ui.png "sysarch")
+- Open http://localhost:8081 in your browser
+- Check that flink is up and two task slots are available
+  ![sysarch](assets/flink-ui.png "sysarch")
+
+**Producer Logs** (see data being sent):
+```bash
+docker compose logs csv-producer --tail 50 -f
+```
+**View Logs for other services**
+```bash
+# All services
+docker compose logs -f
+
+# Specific service
+docker compose logs kafka -f
+docker compose logs csv-producer -f
+docker compose logs flink-jobmanager -f
+
+# Last N lines
+docker compose logs --tail 100
+```
+
+### 6. Build Flink Job Jar
+- Run from project directory
+```bash
+cd flink-stress-data-processor
+mvn clean package
+```
+- After executing the above commands the flink-stress-data-processor-1.0-SNAPSHOT.jar should get generated in the target folder of flink-stress-data-processor directory
+
+### 7. Submit Flink Job Jar 
+- Open http://localhost:8081 in your browser
+- Navigate to
+- Upload the jar file "flink-stress-data-processor-1.0-SNAPSHOT.jar" generated in previous step and submit the job
+  ![sysarch](assets/flink_jar.png "sysarch")
+- Verify that the job is running and that real-time watermarks are generated
+  ![sysarch](assets/flink_job_running.png "sysarch")
+  ![sysarch](assets/flink_watermark.png "sysarch")
+
+### 8. Create dashboard in Grafana and visualise results
+- Open http://localhost:3000 in your browser
+- Use admin/admin as credentials
+- Connect to InfluxDB 
+- Use UI to build queries and create dashboards to visualise the real-time processed data
+  ![sysarch](assets/dashboard.png "sysarch")
+
+
+  ![sysarch](assets/panel1.png "sysarch")
+
+
+  ![sysarch](assets/panel2.png "sysarch")
+
+
+  ![sysarch](assets/panel3.png "sysarch")
+
+
+  ![sysarch](assets/panel4.png "sysarch")
+
+
 ### Dask Fallback System
 
 This project includes an **automatic fallback system** using Dask ML that activates when the primary Flink pipeline experiences resource constraints. The fallback ensures continuous stress monitoring without data loss.
@@ -37,271 +148,130 @@ cd dask-fallback && ./test_fallback.sh
 - 📚 [Full Documentation](dask-fallback/README.md) - Detailed technical docs
 - 🚀 [Quick Start](dask-fallback/QUICK_START.md) - Commands and tips
 
-
-## Prerequisites
-
-- **Docker Desktop** (with Docker Compose v2)
-- **Git**
-- **Python 3.8+** (for local development, optional)
-- **2 GB+ available disk space**
-
-## Quick Start (5 minutes)
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/peppermintflowers/nurse_stress_prediction.git
-cd nurse_stress_prediction
-git checkout flink-kafka-pipeline
-```
-
-### 2. Verify Docker is Running
-
-```bash
-docker --version
-docker compose version
-```
-
-Both should output version info. If not, install Docker Desktop.
-
-### 3. Start All Services
-
-From the project root (`nurse_stress_prediction`), run:
-
-```bash
-docker compose up --build -d
-```
-
-This will:
-- Pull/build all images (Zookeeper, Kafka, Kafka UI, CSV Producer)
-- Start containers in detached mode
-- CSV producer will immediately begin streaming data from `data/workers.csv` to Kafka
-
-### 4. Verify Services are Running
-
-```bash
-docker compose ps
-```
-
-You should see 4 containers with status `Up`.
-
-### 5. Monitor the Pipeline
-
-**Kafka UI Dashboard** (view topics & messages):
-- Open http://localhost:8080 in your browser
-- Navigate to **Topics** → **stress-topic** to see messages flowing
-
-**Producer Logs** (see data being sent):
-```bash
-docker compose logs csv-producer --tail 50 -f
-```
-
 ## Project Structure
 
 ```
-stress-pipeline/
-├── docker-compose.yml              # Service orchestration
-├── .gitignore                       # Git ignore (large dataset)
-├── README.md                        # This file
-│
-├── data/
-│   ├── workers.csv                  # Sample worker data (4 records)
-│   ├── producer.py                  # Kafka producer script
-│   ├── requirements.txt             # Python dependencies
-│   └── Dockerfile.producer          # Producer container image
-│── flask_predictor/
-│   ├── model                       # Update model file to this directory
-│   ├── app.py                      # Script to host prediction model
-│   ├── requirements.txt            # Python dependencies
-│   └── Dockerfile                  # Flask API container image
-│
-├── flink-stress-data-processor/
-│   ├── src                         # Directory contains code for flink job
-│   ├── .gitignore                  # Git ignore
+.
+├── assets
+│   ├── architecture_diagram.png
+│   └── flink_workflow.png
+├── DASK_FALLBACK_INTEGRATION.md
+├── dask-fallback
+│   ├── ARCHITECTURE.md
+│   ├── config.yaml
+│   ├── dask_processor.py
+│   ├── Dockerfile
+│   ├── monitor.py
+│   ├── orchestrator.py
+│   ├── QUICK_START.md
+│   ├── README.md
+│   ├── requirements.txt
+│   └── test_fallback.sh
+├── data
+│   ├── create_topic.sh
+│   ├── data_processing_for_demo.ipynb
+│   ├── Dockerfile.producer
+│   ├── nurse_sensor_event.avsc
+│   ├── producer.py
+│   ├── requirements.txt
+│   └── workers.csv.zip
+├── DEPLOYMENT_GUIDE.md
+├── docker-compose.yml
+├── flask-predictor
+│   ├── app.py
+│   ├── Dockerfile
+│   ├── model
+│   │   └── stress_prediction_model_lgbm.joblib
+│   └── requirements.txt
+├── flink-stress-data-processor
+│   ├── dependency-reduced-pom.xml
+│   ├── Dockerfile
+│   ├── pom.xml
+│   ├── src
+│   │   └── main
+│   │       ├── avro
+│   │       │   └── SensorRecord.avsc
+│   │       └── java
+│   │           └── com
+│   │               └── nurse
+│   │                   └── stress
+│   │                       └── prediction
+│   │                           ├── model
+│   │                           │   ├── IOTPing.java
+│   │                           │   └── NurseMetrics.java
+│   │                           ├── processing
+│   │                           │   ├── AverageAggregator.java
+│   │                           │   ├── Constants.java
+│   │                           │   ├── StressPredictionAsyncFunction.java
+│   │                           │   ├── StressPredictorJob.java
+│   │                           │   ├── WatermarkStrategyFactory.java
+│   │                           │   └── WindowResultFunction.java
+│   │                           ├── sink
+│   │                           │   └── InfluxSinkPing.java
+│   │                           └── source
+│   │                               └── KafkaSourceFactory.java
+│   ├── submit-job.sh
+│   └── target
+│       ├── classes
+│       │   └── com
+│       │       └── nurse
+│       │           └── stress
+│       │               └── prediction
+│       │                   ├── model
+│       │                   │   ├── IOTPing.class
+│       │                   │   └── NurseMetrics.class
+│       │                   ├── processing
+│       │                   │   ├── AverageAggregator.class
+│       │                   │   ├── Constants.class
+│       │                   │   ├── StressPredictionAsyncFunction.class
+│       │                   │   ├── StressPredictorJob.class
+│       │                   │   ├── WatermarkStrategyFactory.class
+│       │                   │   ├── WatermarkStrategyFactory$1.class
+│       │                   │   └── WindowResultFunction.class
+│       │                   ├── SensorRecord.class
+│       │                   ├── SensorRecord$1.class
+│       │                   ├── SensorRecord$Builder.class
+│       │                   ├── sink
+│       │                   │   └── InfluxSinkPing.class
+│       │                   └── source
+│       │                       └── KafkaSourceFactory.class
+│       ├── flink-stress-data-processor-1.0-SNAPSHOT.jar
+│       ├── generated-sources
+│       │   ├── annotations
+│       │   └── avro
+│       │       └── com
+│       │           └── nurse
+│       │               └── stress
+│       │                   └── prediction
+│       │                       └── SensorRecord.java
+│       ├── maven-archiver
+│       │   └── pom.properties
+│       ├── maven-status
+│       │   └── maven-compiler-plugin
+│       │       └── compile
+│       │           └── default-compile
+│       │               ├── createdFiles.lst
+│       │               └── inputFiles.lst
+│       ├── original-flink-stress-data-processor-1.0-SNAPSHOT.jar
+│       └── project-local-repo
+│           └── org.example
+│               └── flink-stress-data-processor
+│                   └── 1.0-SNAPSHOT
+│                       ├── flink-stress-data-processor-1.0-SNAPSHOT-consumer.pom
+│                       ├── flink-stress-data-processor-1.0-SNAPSHOT.jar
+│                       └── flink-stress-data-processor-1.0-SNAPSHOT.pom
+├── grafana_dashboard_dual_source.json
+├── HOW_TO_USE_DASK_FALLBACK.md
+├── IMPLEMENTATION_SUMMARY.md
+├── ml_model
+│   ├── stress_model_training.py
+│   ├── stress_prediction_model_lgbm.joblib
+│   └── stress_prediction_model.joblib
+├── README.md
+├── verify_both_sources.sh
+└── VERIFYING_DATA_FROM_BOTH_SOURCES.md
 
 ```
-
-## Customization & Integration
-
-### Use Your Own Dataset
-
-1. **Replace the sample data:**
-   ```bash
-   # Copy your CSV to data/workers.csv
-   cp /path/to/your/workers.csv data/workers.csv
-   ```
-   Expected columns: `id`, `name`, `cpu`, `memory`
-
-2. **Restart the producer:**
-   ```bash
-   docker compose restart csv-producer
-   ```
-
-### Adjust Streaming Parameters
-
-Edit `docker-compose.yml` to change producer behavior:
-
-```yaml
-csv-producer:
-  environment:
-    TOPIC: "stress-topic"              # Kafka topic name
-    KAFKA_BOOTSTRAP: "kafka:9092"      # Kafka broker address
-    PRODUCER_LOOP: "true"              # Loop CSV: true=continuous, false=once
-    SEND_DELAY: "0.5"                  # Delay between messages (seconds)
-```
-
-Then restart:
-```bash
-docker compose restart csv-producer
-```
-
-### Flink Integration
-
-Your Java Flink job should consume messages from `stress-topic` in Kafka. The messages are in JSON format:
-
-```json
-{
-  "id": "w1",
-  "name": "worker-a",
-  "cpu": 4,
-  "memory": 8192,
-  "datetime": "2025-11-26T10:30:00"
-}
-```
-
-Kafka is running on `kafka:9092` (internal Docker network) or `localhost:9092` (external).
-
-## Useful Commands
-
-### View Logs
-
-```bash
-# All services
-docker compose logs -f
-
-# Specific service
-docker compose logs kafka -f
-docker compose logs csv-producer -f
-docker compose logs flink-jobmanager -f
-
-# Last N lines
-docker compose logs --tail 100
-```
-
-### Stop All Services
-
-```bash
-docker compose down
-```
-
-### Stop & Remove Data (Clean Slate)
-
-```bash
-docker compose down -v
-```
-
-### Restart a Service
-
-```bash
-docker compose restart csv-producer
-```
-
-### Rebuild an Image
-
-```bash
-docker compose build csv-producer --no-cache
-docker compose up -d csv-producer
-```
-
-## Troubleshooting
-
-### "NoBrokersAvailable" Error in Producer
-
-**Cause:** Kafka is not yet ready when producer starts.  
-**Solution:** Producer has a built-in retry loop. Wait 30–60 seconds for Kafka to stabilize, then restart:
-```bash
-docker compose restart csv-producer
-```
-
-### Kafka Topic Not Showing in Kafka UI
-
-**Cause:** Topic takes time to be created.  
-**Solution:** Refresh the browser or wait 10 seconds and refresh.
-
-### Large Memory Usage
-
-**Cause:** Flink + Kafka containers use ~2–3 GB RAM.  
-**Solution:** 
-- Increase Docker Desktop memory limit in settings
-- Or reduce Flink memory in `docker-compose.yml`:
-  ```yaml
-  flink-jobmanager:
-    deploy:
-      resources:
-        limits:
-          memory: 512m  # Reduce from default
-  ```
-
-### Port Already in Use
-
-**Cause:** Another service is using ports 8080, 8081, 9092, or 2181.  
-**Solution:** Change port mappings in `docker-compose.yml`:
-```yaml
-kafka:
-  ports:
-    - "9093:9092"  # Map to 9093 instead of 9092
-```
-
-## For ML Integration (Java Flink)
-
-Your Java Flink job receives JSON messages from the `stress-topic` topic. Parse and process them as needed for your stress prediction model.
-
-### Message Format
-
-```json
-{
-  "id": "w1",
-  "name": "worker-a",
-  "cpu": 4,
-  "memory": 8192,
-  "datetime": "2025-11-26T10:30:00"
-}
-```
-
-### Kafka Connection Details
-
-- **Bootstrap Servers:** `kafka:9092` (Docker network) or `localhost:9092` (local)
-- **Topic:** `stress-topic`
-- **Consumer Group:** Configure in your Java Flink job
-- **Format:** JSON strings
-
-## Performance & Scaling
-
-- **Throughput:** ~100 messages/sec per producer (configurable via `SEND_DELAY`)
-- **Latency:** <1s end-to-end (Kafka → Flink window → prediction)
-- **Scale:** To process more data, increase producer `SEND_DELAY` or add multiple producers
-
-## Next Steps for Your Team
-
-1. **Clone this repo** and check out the main branch
-2. **Run `docker compose up -d`** to start Kafka
-3. **Connect your Java Flink job** to `kafka:9092` and consume from `stress-topic`
-4. **Process messages** through your ML pipeline
-5. **Monitor Kafka UI** at http://localhost:8080 to verify data flow
-
-## Support & Issues
-
-- **Docker errors:** Ensure Docker Desktop is running and has sufficient memory (4+ GB)
-- **Git issues:** Verify remote: `git remote -v`
-- **Flink errors:** Your Java Flink job handles processing; ensure it can connect to `kafka:9092`
-- **Kafka errors:** Check logs: `docker compose logs kafka`
-
-## License
-
-Same as parent repository (nurse_stress_prediction)
-
----
 
 **Branch:** `main`  
-**Created:** November 2025  
-**Status:** Kafka streaming ready for external Flink integration
+**Created:** November 2025
