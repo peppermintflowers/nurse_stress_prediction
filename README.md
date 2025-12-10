@@ -105,6 +105,8 @@ mvn clean package
 - Use admin/admin as credentials
 - Connect to InfluxDB 
 - Use UI to build queries and create dashboards to visualise the real-time processed data
+- The grafana dashboard was created in UI for flink and its code has been exported to grafana_dashboard_for_flink.json and placed in the directory "grafana_dashboard_json"
+
   ![sysarch](assets/dashboard.png "sysarch")
 
 
@@ -152,125 +154,15 @@ cd dask-fallback && ./test_fallback.sh
 
 ```
 .
-├── assets
-│   ├── architecture_diagram.png
-│   └── flink_workflow.png
-├── DASK_FALLBACK_INTEGRATION.md
-├── dask-fallback
-│   ├── ARCHITECTURE.md
-│   ├── config.yaml
-│   ├── dask_processor.py
-│   ├── Dockerfile
-│   ├── monitor.py
-│   ├── orchestrator.py
-│   ├── QUICK_START.md
-│   ├── README.md
-│   ├── requirements.txt
-│   └── test_fallback.sh
-├── data
-│   ├── create_topic.sh
-│   ├── data_processing_for_demo.ipynb
-│   ├── Dockerfile.producer
-│   ├── nurse_sensor_event.avsc
-│   ├── producer.py
-│   ├── requirements.txt
-│   └── workers.csv.zip
-├── DEPLOYMENT_GUIDE.md
-├── docker-compose.yml
-├── flask-predictor
-│   ├── app.py
-│   ├── Dockerfile
-│   ├── model
-│   │   └── stress_prediction_model_lgbm.joblib
-│   └── requirements.txt
-├── flink-stress-data-processor
-│   ├── dependency-reduced-pom.xml
-│   ├── Dockerfile
-│   ├── pom.xml
-│   ├── src
-│   │   └── main
-│   │       ├── avro
-│   │       │   └── SensorRecord.avsc
-│   │       └── java
-│   │           └── com
-│   │               └── nurse
-│   │                   └── stress
-│   │                       └── prediction
-│   │                           ├── model
-│   │                           │   ├── IOTPing.java
-│   │                           │   └── NurseMetrics.java
-│   │                           ├── processing
-│   │                           │   ├── AverageAggregator.java
-│   │                           │   ├── Constants.java
-│   │                           │   ├── StressPredictionAsyncFunction.java
-│   │                           │   ├── StressPredictorJob.java
-│   │                           │   ├── WatermarkStrategyFactory.java
-│   │                           │   └── WindowResultFunction.java
-│   │                           ├── sink
-│   │                           │   └── InfluxSinkPing.java
-│   │                           └── source
-│   │                               └── KafkaSourceFactory.java
-│   ├── submit-job.sh
-│   └── target
-│       ├── classes
-│       │   └── com
-│       │       └── nurse
-│       │           └── stress
-│       │               └── prediction
-│       │                   ├── model
-│       │                   │   ├── IOTPing.class
-│       │                   │   └── NurseMetrics.class
-│       │                   ├── processing
-│       │                   │   ├── AverageAggregator.class
-│       │                   │   ├── Constants.class
-│       │                   │   ├── StressPredictionAsyncFunction.class
-│       │                   │   ├── StressPredictorJob.class
-│       │                   │   ├── WatermarkStrategyFactory.class
-│       │                   │   ├── WatermarkStrategyFactory$1.class
-│       │                   │   └── WindowResultFunction.class
-│       │                   ├── SensorRecord.class
-│       │                   ├── SensorRecord$1.class
-│       │                   ├── SensorRecord$Builder.class
-│       │                   ├── sink
-│       │                   │   └── InfluxSinkPing.class
-│       │                   └── source
-│       │                       └── KafkaSourceFactory.class
-│       ├── flink-stress-data-processor-1.0-SNAPSHOT.jar
-│       ├── generated-sources
-│       │   ├── annotations
-│       │   └── avro
-│       │       └── com
-│       │           └── nurse
-│       │               └── stress
-│       │                   └── prediction
-│       │                       └── SensorRecord.java
-│       ├── maven-archiver
-│       │   └── pom.properties
-│       ├── maven-status
-│       │   └── maven-compiler-plugin
-│       │       └── compile
-│       │           └── default-compile
-│       │               ├── createdFiles.lst
-│       │               └── inputFiles.lst
-│       ├── original-flink-stress-data-processor-1.0-SNAPSHOT.jar
-│       └── project-local-repo
-│           └── org.example
-│               └── flink-stress-data-processor
-│                   └── 1.0-SNAPSHOT
-│                       ├── flink-stress-data-processor-1.0-SNAPSHOT-consumer.pom
-│                       ├── flink-stress-data-processor-1.0-SNAPSHOT.jar
-│                       └── flink-stress-data-processor-1.0-SNAPSHOT.pom
-├── grafana_dashboard_dual_source.json
-├── HOW_TO_USE_DASK_FALLBACK.md
-├── IMPLEMENTATION_SUMMARY.md
-├── ml_model
-│   ├── stress_model_training.py
-│   ├── stress_prediction_model_lgbm.joblib
-│   └── stress_prediction_model.joblib
-├── README.md
-├── verify_both_sources.sh
-└── VERIFYING_DATA_FROM_BOTH_SOURCES.md
-
+├── assets #images used in README
+├── dask-fallback #dask-fallback code and documentation
+├── data #kafka producer code, data source and data downsampling code
+├── docker-compose.yml 
+├── flask-predictor #code for api that hosts model
+├── flink-stress-data-processor #flink job code
+├── grafana_dashboard_json #holds exported json codes for grafana dashboards
+├── ml_model #contains code for ml and model files
+└── README.md 
 ```
 
 **Branch:** `main`  
