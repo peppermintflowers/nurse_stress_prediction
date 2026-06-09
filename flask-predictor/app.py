@@ -6,7 +6,7 @@ import os
 app = Flask(__name__)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_DIR = os.path.join(BASE_DIR, "model")
+MODEL_DIR = os.path.join(BASE_DIR, "..", "ml_model")
 
 # Load both models at startup
 lgbm_model = joblib.load(os.path.join(MODEL_DIR, "stress_prediction_model_lgbm.joblib"))
